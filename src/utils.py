@@ -58,6 +58,14 @@ def get_entities(txt):
         for e in doc.ents:
             res.append({'text':e.text, 'label':e.label_})
     return res
+def value_counts_top(srs,top_n=5, other_cat='other'):
+    srs_v=srs.value_counts()
+    srs_top=srs_v.head(top_n).copy()
+    srs_n_all=srs_v.sum()
+    srs_n_top=srs_top.sum()
+    srs_top[other_cat]=srs_n_all-srs_n_top
+    return srs_top
+
 
 def flatten_list(res):
     res=copy.deepcopy(res)
