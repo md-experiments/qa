@@ -2,7 +2,7 @@ from sklearn.metrics.pairwise import paired_cosine_distances, paired_euclidean_d
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from src.utils import TimeClass
+from src.utils import TimeClass, simple_time_stamp
 from src.entity_actions import reduce_to_matching_ent_by_type
 from src.statistical_distributions import beta_pdf_vector
 
@@ -49,17 +49,17 @@ def compare_replacement_methods(df,
         ls_stats.append([secs,nr_samples,len(df_pos),df_pos.mean(),df_pos.var(),len(df_neg),df_neg.mean(),df_neg.var(),])
 
         fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16,2))
-        fig.suptitle(f'Comparing {e}, took {mins} minutes',size=12)
+        fig.suptitle(f'Comparing {e}, took {mins} minutes, {nr_samples} samples',size=12)
         df_pos.plot.hist(bins=100, alpha=0.7, ax=axes, color='blue')
         pd.DataFrame(beta_pdf_vector(df_pos.mean(),df_pos.var(),len(df_pos)),
                      index=[x/100 for x in range(101)],
-                     columns=['Positive']).plot(ax=axes, color='midnightblue')
+                     columns=['Duplicate']).plot(ax=axes, color='midnightblue')
         df_neg.plot.hist(bins=100, alpha=0.7, ax=axes, color='red')
         pd.DataFrame(beta_pdf_vector(df_neg.mean(),df_neg.var(),len(df_neg)), 
                      index=[x/100 for x in range(101)], 
-                     columns=['Negative']).plot(ax=axes, color='red')
+                     columns=['Non-Duplicate']).plot(ax=axes, color='red')
         
     df_stats=pd.DataFrame(ls_stats,columns=col_stats)
-
+    dt=simple_time_stamp()
     df_stats.to_csv(f'exp_{ent_type}_{dt}.csv')
     return df, df_stats

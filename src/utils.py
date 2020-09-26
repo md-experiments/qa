@@ -150,6 +150,8 @@ def parallelize(fun,df,nr_pr=10):
 
 def simple_time_stamp(dt=None):
     """
+    Returns a timestamp of current time or a datetime input
+    output format YYYYMMDD_HHMM
     
     >>> simple_time_stamp('2020-09-26 22:00:00')
     '20200926_2200'
