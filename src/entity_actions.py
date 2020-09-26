@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from src.utils import TimeClass
 
 def find_ents(quora):
     quora=quora.copy()
@@ -24,6 +25,9 @@ def replace_list_ents(txt,ent_ls,stand_in_ls=None, lower=True):
     >>> replace_list_ents('Bob met Sally',['Bob','Sally'])
     'Bob met Sally'
     """
+    if not isinstance(txt,str):
+        txt=str(txt)
+
     if lower:
         txt=txt.lower()
     if not stand_in_ls==None:
@@ -79,33 +83,3 @@ def reduce_to_matching_ent_by_type(df, ent_type, stand_in_ls, columns=['question
     df[f'{columns[1]}{mask_col_ending}']=df.apply(lambda x: replace_list_ents(x[columns[1]], x['ent_overlap'], stand_in_ls),axis=1)
     df_res=df[df.ent_overlap.apply(lambda x: len(x)>0)]
     return df_res
-
-def compare_replacement_methods(df,
-                                model,
-                                experiments={
-                                    'no change':{'stand_in':None,'col_name':''},
-                                    'remove':{'stand_in':[''],'col_name':'_remove'},
-                                },
-                                ent_type='ORG'):
-    """Creates plots for the distribution of cosine similarities 
-    between embeddings using different replacement strategies for a certain entity type
-    
-    
-    """
-    df=df.copy()
-    for e in experiments:
-        df=reduce_to_matching_ent_by_type(df,
-                                          ent_type,
-                                          experiments[e]['stand_in'],
-                                          mask_col_ending=experiments[e]['col_name'])
-        similarity_col=f'similarity{experiments[e]["col_name"]}'
-        df[similarity_col] = get_similarities(df, 
-                  model, 
-                  columns=[f"question1{experiments[e]['col_name']}",
-                           f"question2{experiments[e]['col_name']}"])
-
-        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16,2))
-        fig.suptitle(f'Comparing {e}',size=18)
-        df[df.is_duplicate==0][similarity_col].plot.hist(bins=50,alpha=0.7,ax=axes)
-        df[df.is_duplicate==1][similarity_col].plot.hist(bins=50,alpha=0.7,ax=axes)
-    return df
