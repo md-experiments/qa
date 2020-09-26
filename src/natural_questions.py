@@ -17,6 +17,7 @@ class NaturalQuestions():
         df_qa['ANS_SHORT']=df_qa.apply(lambda x: self.extract_answer(x, long_answer=False), axis=1)
         df_qa['HAS_SHORT']=df_qa.ANS_SHORT.apply(lambda x: len(x)>0)
         df_qa['ANS_LONG']=df_qa.apply(lambda x: self.extract_answer(x, long_answer=True), axis=1)
+        df_qa['HAS_LONG']=df_qa.ANS_LONG.apply(lambda x: x!='')
 
         self.df_qa=df_qa
         self.len_df=len(self.df_qa)

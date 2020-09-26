@@ -48,16 +48,17 @@ def get_entities(txt):
     []
     """
 
-    if isinstance(txt,str):
+    if not isinstance(txt,list):
         txt=[txt]
     res=[]
         
     for t in txt:
-        doc=nlp(t)
+        doc=nlp(str(t))
 
         for e in doc.ents:
             res.append({'text':e.text, 'label':e.label_})
     return res
+
 def value_counts_top(srs,top_n=5, other_cat='other'):
     srs_v=srs.value_counts()
     srs_top=srs_v.head(top_n).copy()
@@ -70,3 +71,20 @@ def value_counts_top(srs,top_n=5, other_cat='other'):
 def flatten_list(res):
     res=copy.deepcopy(res)
     return list(itertools.chain.from_iterable(res))
+
+def parallelize(fun,df,nr_pr=10):
+    from multiprocessing import Pool
+    
+    full_len=len(df)
+    batch_sz=(int(full_len/nr_pr)+1)
+
+    with Pool(nr_pr) as p:
+        ex=p.map(fun, 
+                 [df.iloc[range(i*batch_sz,min((i+1)*batch_sz,full_len))] 
+                          for i in range(nr_pr)])
+    
+    fs=FrameStacker()
+    for e in ex:
+        fs.append(e)
+    df_full=fs.stack()
+    return df_full
